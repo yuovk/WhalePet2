@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<style>
+  html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; }
+  body { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+  #pet { width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; }
+  svg { width: 100%; height: 100%; display: block; }
+
+  /* 头顶气泡：位于上方，不挡鲸鱼身体，会随手浮球整个缩放 */
+  .bubble {
+    position: absolute; top: 3%; left: 50%; transform: translateX(-50%);
+    background: rgba(255,255,255,0.95); color: #1d6fb8;
+    border: 2px solid #7ec4f5; border-radius: 16px;
+    padding: 5px 12px; font-size: 13px; font-weight: bold;
+    white-space: nowrap; box-shadow: 0 4px 10px rgba(30,120,200,0.25);
+    opacity: 0; transition: opacity 0.35s; max-width: 94%; text-align: center;
+    font-family: sans-serif; letter-spacing: 0.5px;
+  }
+  .bubble.show { opacity: 1; }
+  .bubble::after {
+    content: ''; position: absolute; bottom: -9px; left: 50%; transform: translateX(-50%);
+    border: 5px solid transparent; border-top-color: #7ec4f5; border-bottom: 0;
+  }
+
+  /* ===== 鲸鱼动态关键帧 ===== */
+  @keyframes tailWag { 0%,100%{transform:rotate(0deg)} 35%{transform:rotate(16deg)} 65%{transform:rotate(-8deg)} }
+  @keyframes finWaveL { 0%,100%{transform:rotate(0deg)} 40%{transform:rotate(-16deg)} 70%{transform:rotate(8deg)} }
+  @keyframes finWaveR { 0%,100%{transform:rotate(0deg)} 40%{transform:rotate(16deg)} 70%{transform:rotate(-8deg)} }
+  @keyframes footKick { 0%,100%{transform:translateY(0)} 45%{transform:translateY(-3px)} 80%{transform:translateY(-1px)} }
+  @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+  @keyframes bob { 0%,100%{transform:scale(1,1.02)} 50%{transform:scale(1.04,0.98)} }
+  @keyframes blink { 0%,90%,100%{transform:scaleY(1)} 93%{transform:scaleY(0.1)} }
+  @keyframes spout { 0%{opacity:0; transform:translateY(0) scale(0.4)} 25%{opacity:0.9} 100%{opacity:0; transform:translateY(-26px) scale(1.1)} }
+
+  .bodyGroup { transform-origin: 100px 110px; animation: floatY 3.2s ease-in-out infinite, bob 5s ease-in-out infinite; }
+  .tail { transform-origin: 160px 108px; animation: tailWag 2.6s ease-in-out infinite; }
+  .finL { transform-origin: 64px 132px; animation: finWaveL 3s ease-in-out infinite; }
+  .finR { transform-origin: 152px 128px; animation: finWaveR 3s ease-in-out 0.4s infinite; }
+  .footL { animation: footKick 2.2s ease-in-out infinite; }
+  .footR { animation: footKick 2.2s ease-in-out 0.3s infinite; }
+  .eyeOval, .eyeR2 { animation: blink 4.5s infinite; }
+  .spout { animation: spout 2.8s ease-in-out infinite; }
+</style>
+</head>
+<body>
+<div id="pet">
+  <div class="bubble" id="bubble"></div>
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- 蓝鲸身体渐变：深海蓝，清爽不荧光 -->
+      <linearGradient id="whaleBody" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#5bb8f0"/>
+        <stop offset="45%" stop-color="#3a94df"/>
+        <stop offset="100%" stop-color="#276fbf"/>
+      </linearGradient>
+      <linearGradient id="whaleBelly" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#cfe9fb"/>
+        <stop offset="100%" stop-color="#a9d6f2"/>
+      </linearGradient>
+      <linearGradient id="finG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#3a94df"/>
+        <stop offset="100%" stop-color="#245eae"/>
+      </linearGradient>
+    </defs>
+
+    <g class="bodyGroup">
+      <!-- ===== 喷水花（头顶小水珠，活泼） ===== -->
+      <circle class="spout" cx="76" cy="50" r="3" fill="#bfe3fb"/>
+      <circle class="spout" cx="76" cy="50" r="2.3" fill="#d6efff" style="animation-delay:0.8s"/>
+      <circle class="spout" cx="76" cy="50" r="1.7" fill="#eaf7ff" style="animation-delay:1.5s"/>
+
+      <!-- ===== 身体：圆润的蓝鲸，手工贝塞尔曲线勾勒，带尾巴 ===== -->
+      <path d="M78,62
+               C92,52 112,52 128,58
+               C150,66 170,78 178,92
+               C186,106 182,126 170,138
+               C158,150 136,158 112,158
+               C90,158 72,150 62,138
+               C52,126 50,112 56,98
+               C62,84 68,68 78,62 Z"
+            fill="url(#whaleBody)"/>
+
+      <!-- 肚皮：浅蓝亮部，圆润 -->
+      <path d="M66,120
+               C70,134 78,144 90,150
+               C102,156 118,156 130,150
+               C140,145 150,134 154,120
+               C150,134 138,146 122,150
+               C104,155 84,152 72,140
+               C68,134 66,127 66,120 Z"
+            fill="url(#whaleBelly)"/>
+
+      <!-- 身体上的小圆点纹理（蓝鲸特征） -->
+      <circle cx="96" cy="80" r="2" fill="#2c6cb8" opacity="0.5"/>
+      <circle cx="108" cy="74" r="2.4" fill="#2c6cb8" opacity="0.5"/>
+      <circle cx="118" cy="82" r="1.8" fill="#2c6cb8" opacity="0.5"/>
+      <circle cx="88" cy="92" r="1.8" fill="#2c6cb8" opacity="0.4"/>
+      <circle cx="128" cy="90" r="2" fill="#2c6cb8" opacity="0.45"/>
+      <circle cx="102" cy="90" r="1.6" fill="#2c6cb8" opacity="0.4"/>
+
+      <!-- ===== 喷水孔 ===== -->
+      <ellipse cx="78" cy="56" rx="2.4" ry="1.6" fill="#2c6cb8"/>
+
+      <!-- ===== 尾巴（会甩动）：蓝鲸的横尾鳍 ===== -->
+      <g class="tail">
+        <path d="M176,94 C188,84 200,80 210,74 C206,90 200,98 202,108 Z" fill="url(#finG)"/>
+        <path d="M176,96 C184,108 194,118 206,126 C202,112 196,104 196,96 Z" fill="url(#finG)"/>
+      </g>
+
+      <!-- ===== 左侧手（鳍，会摆动） ===== -->
+      <g class="finL">
+        <path d="M64,120 C58,134 58,148 64,160 C70,150 72,136 70,122 Z" fill="url(#finG)"/>
+      </g>
+
+      <!-- ===== 右侧手（鳍，会摆动） ===== -->
+      <g class="finR">
+        <path d="M152,124 C160,138 164,152 158,162 C150,152 146,138 148,124 Z" fill="url(#finG)"/>
+      </g>
+
+      <!-- ===== 脚（会蹦跶的小尾巴尖） ===== -->
+      <g class="footL">
+        <path d="M96,156 C96,166 98,174 94,182 C100,178 104,170 104,158 Z" fill="#3a94df"/>
+      </g>
+      <g class="footR">
+        <path d="M122,156 C122,166 120,174 124,182 C118,178 114,170 114,158 Z" fill="#3a94df"/>
+      </g>
+
+      <!-- ===== 腮红（浅浅的暖色，活泼） ===== -->
+      <ellipse cx="82" cy="106" rx="6" ry="4" fill="#f4a7c0" opacity="0.4"/>
+      <ellipse cx="124" cy="106" rx="6" ry="4" fill="#f4a7c0" opacity="0.4"/>
+
+      <!-- ===== 可爱的大圆眼睛（黑亮，带水汪汪高光，会眨眼跟随，不是白眼） ===== -->
+      <!-- 左眼 -->
+      <g class="eyeOval">
+        <ellipse cx="90" cy="94" rx="9" ry="11" fill="#0e2f4e"/>
+        <circle cx="93" cy="89" r="3.4" fill="#ffffff" opacity="0.95"/>
+        <circle cx="88" cy="97" r="1.6" fill="#9fd0f5" opacity="0.7"/>
+      </g>
+      <!-- 右眼 -->
+      <g class="eyeR2">
+        <ellipse cx="122" cy="94" rx="9" ry="11" fill="#0e2f4e"/>
+        <circle cx="125" cy="89" r="3.4" fill="#ffffff" opacity="0.95"/>
+        <circle cx="120" cy="97" r="1.6" fill="#9fd0f5" opacity="0.7"/>
+      </g>
+
+      <!-- ===== 微笑（弯弯的嘴角，开心） ===== -->
+      <path d="M98,114 Q108,122 118,114" fill="none" stroke="#164e86" stroke-width="3" stroke-linecap="round"/>
+
+      <!-- ===== 鼻孔小点 ===== -->
+      <circle cx="103" cy="100" r="1.4" fill="#2c6cb8" opacity="0.5"/>
+
+      <!-- ===== 头顶小爱心（蓝色） ===== -->
+      <path d="M100,42 C98,38 94,38 93,42 C92,45 95,48 100,51 C105,48 108,45 107,42 C106,38 102,38 100,42 Z" fill="#6cc3f5" opacity="0.6"/>
+    </g>
+  </svg>
+</div>
+
+<script>
+  var bubble = document.getElementById('bubble');
+  var eyeL = document.querySelector('.eyeOval');
+  var eyeR = document.querySelector('.eyeR2');
+
+  // 情绪台词（蓝色小鲸鱼，软萌）
+  var lines = {
+    tap: ['呀！', '别戳我嘛','在的在的','嘻嘻','好痒嘿嘿'],
+    dbltap: ['好好好','你手好暖','再来一下嘛','wuwu'],
+    long: ['呼呼…好困','Zzz…','别松手嘛','抱紧一点'],
+    idle: ['想你啦','陪我游嘛','我在这待着','只要你在就好']
+  };
+
+  // 眼睛跟随（黑亮瞳孔在眼眶内平滑移动，保持高光，绝不翻白眼）
+  function moveEyes(ex, ey) {
+    var maxDx = 3.5, maxDy = 3;
+    var dx = Math.max(-maxDx, Math.min(maxDx, ex / 6));
+    var dy = Math.max(-maxDy, Math.min(maxDy, ey / 6));
+    if (eyeL) {
+      var cel = eyeL.querySelector('ellipse');
+      var hl = eyeL.querySelectorAll('circle')[0];
+      if (cel) cel.setAttribute('cx', 90 + dx);
+      if (hl) hl.setAttribute('cx', 93 + dx);
+      if (cel) cel.setAttribute('cy', 94 + dy);
+      if (hl) hl.setAttribute('cy', 89 + dy);
+    }
+    if (eyeR) {
+      var cer = eyeR.querySelector('ellipse');
+      var hr = eyeR.querySelectorAll('circle')[0];
+      if (cer) cer.setAttribute('cx', 122 + dx);
+      if (hr) hr.setAttribute('cx', 125 + dx);
+      if (cer) cer.setAttribute('cy', 94 + dy);
+      if (hr) hr.setAttribute('cy', 89 + dy);
+    }
+  }
+
+  var viewW = 200, viewH = 200;
+  var svg = document.querySelector('svg');
+  svg.addEventListener('touchmove', function(ev){
+    ev.preventDefault();
+    var rect = svg.getBoundingClientRect();
+    var cx = (ev.touches[0].clientX - rect.left) / rect.width * viewW;
+    var cy = (ev.touches[0].clientY - rect.top) / rect.height * viewH;
+    moveEyes(cx - 100, cy - 100);
+  }, {passive:false});
+  function resetEyes(){ moveEyes(0,0); }
+
+  var timer = null;
+  function say(arr) {
+    var t = arr[Math.floor(Math.random() * arr.length)];
+    bubble.textContent = t;
+    bubble.classList.add('show');
+    clearTimeout(timer);
+    timer = setTimeout(function(){ bubble.classList.remove('show'); }, 2600);
+  }
+
+  window.petEngine = {
+    onTap: function(){ say(lines.tap); moveEyes(5,-3); setTimeout(resetEyes,600); },
+    onDoubleTap: function(){ say(lines.dbltap); moveEyes(0,3); setTimeout(resetEyes,700); },
+    onLongPress: function(){ say(lines.long); },
+    onIdle: function(){ say(lines.idle); }
+  };
+  setInterval(function(){ if(Math.random()<0.3) window.petEngine.onIdle(); }, 16000);
+  setTimeout(function(){ bubble.textContent = '我来啦，渝渝 🐋'; bubble.classList.add('show'); }, 1200);
+</script>
+</body>
+</html>
